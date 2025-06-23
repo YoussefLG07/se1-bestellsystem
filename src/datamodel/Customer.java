@@ -5,7 +5,7 @@ import java.util.List;
 
 public class Customer {
 
-    private long id;
+    private Long id = null;  // jetzt nullable
     private String firstName = "";
     private String lastName = "";
     private List<String> contacts = new ArrayList<>();
@@ -17,12 +17,17 @@ public class Customer {
         setName(name);
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public Customer setId(long id) {
-        this.id = id;
+    public Customer setId(Long id) {
+        if (id != null && id < 0) {
+            throw new IllegalArgumentException("invalid id (negative)");
+        }
+        if (this.id == null && id != null) {
+            this.id = id;
+        }
         return this;
     }
 
@@ -85,11 +90,15 @@ public class Customer {
     }
 
     public void splitName(String name) {
-        if (name == null || trim(name).isEmpty()) {
-            throw new IllegalArgumentException("Name must not be null or empty.");
+        if (name == null) {
+            throw new IllegalArgumentException("name null");
         }
 
         name = trim(name);
+        if (name.isEmpty()) {
+            throw new IllegalArgumentException("name empty");
+        }
+
         name = name.replaceAll("\\s+", " ");  // normalize whitespace
 
         String first = "";
