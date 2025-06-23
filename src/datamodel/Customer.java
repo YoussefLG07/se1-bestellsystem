@@ -35,7 +35,10 @@ public class Customer {
     }
 
     public Customer setName(String first, String last) {
-        this.firstName = trim(first);
+        if (last == null || trim(last).isEmpty()) {
+            throw new IllegalArgumentException("last name empty");
+        }
+        this.firstName = trim(first != null ? first : "");
         this.lastName = trim(last);
         return this;
     }
@@ -54,47 +57,33 @@ public class Customer {
     }
 
     public Customer addContact(String contact) {
-        if (contact != null && !contact.trim().isEmpty()) {
-            contacts.add(trim(contact));
+        if (contact == null) {
+            throw new IllegalArgumentException("contact must not be null");
         }
+
+        String trimmed = trim(contact);
+
+        if (trimmed.length() < 6) {
+            throw new IllegalArgumentException("contact less than 6 characters: \"" + contact + "\".");
+        }
+
+        if (!contacts.contains(trimmed)) {
+            contacts.add(trimmed);
+        }
+
         return this;
     }
 
     public void deleteContact(int i) {
-        if (i < 0 || i >= contacts.size()) {
-            throw new IndexOutOfBoundsException("Index out of range: " + i);
+        if (i >= 0 && i < contacts.size()) {
+            contacts.remove(i);
         }
-        contacts.remove(i);
     }
 
     public void deleteAllContacts() {
         contacts.clear();
     }
 
-    /**
-     * Split single-String name into last- and first name parts according to
-     * rules:
-     * <ul>
-     * <li> if a name contains no separators (comma or semicolon {@code [,;]}),
-     *      the trailing consecutive part is the last name, all prior parts
-     *      are first name parts, e.g. {@code "Tim Anton Schulz-Müller"}, splits
-     *      into <i>first name:</i> {@code "Tim Anton"} and <i>last name</i>
-     *      {@code "Schulz-Müller"}.
-     * <li> names with separators (comma or semicolon {@code [,;]}) split into
-     *      a last name part before the separator and a first name part after
-     *      the separator, e.g. {@code "Schulz-Müller, Tim Anton"} splits into
-     *      <i>first name:</i> {@code "Tim Anton"} and <i>last name</i>
-     *      {@code "Schulz-Müller"}.
-     * <li> leading and trailing white spaces {@code [\s]}, commas {@code [,;]}
-     *      and quotes {@code ["']} must be trimmed from names, e.g.
-     *      {@code "  'Schulz-Müller, Tim Anton'    "}.
-     * <li> interim white spaces between name parts must be trimmed, e.g.
-     *      {@code "Schulz-Müller, <white-spaces> Tim <white-spaces> Anton <white-spaces> "}.
-     * </ul>
-     *
-     * @param name single-String name to split into first- and last name parts
-     * @throws IllegalArgumentException if name argument is null or empty
-     */
     public void splitName(String name) {
         if (name == null || trim(name).isEmpty()) {
             throw new IllegalArgumentException("Name must not be null or empty.");
@@ -113,8 +102,8 @@ public class Customer {
         } else {
             String[] parts = name.split(" ");
             if (parts.length == 1) {
-                first = "";
                 last = parts[0];
+                first = "";
             } else {
                 last = parts[parts.length - 1];
                 first = String.join(" ", java.util.Arrays.copyOfRange(parts, 0, parts.length - 1));
@@ -125,13 +114,6 @@ public class Customer {
         this.lastName = last;
     }
 
-    /**
-     * Trim leading and trailing white spaces {@code [\s]}, commas {@code [,;]}
-     * and quotes {@code ["']} from a String (used for names and contacts).
-     *
-     * @param s String to trim
-     * @return trimmed String
-     */
     private String trim(String s) {
         s = s.replaceAll("^[\\s\"',;]*", "");
         s = s.replaceAll("[\\s\"',;]*$", "");
