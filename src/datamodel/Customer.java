@@ -1,87 +1,100 @@
 package datamodel;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.function.BiConsumer;
+
 
 /**
- * Immutable Customer class with fluent accessors.
+ * Entity class representing a {@link Customer} as a person who creates
+ * and holds (owns) orders in the system.
+ * 
+ * @version <code style=color:green>{@value application.package_info#Version}</code>
+ * @author <code style=color:blue>{@value application.package_info#Author}</code>
  */
-public class Customer {
-
-    private final Long id;
-    private final String lastName;
-    private final String firstName;
-    private final List<String> contacts;
+public final class Customer {
 
     /**
-     * Constructor – only package-visible, only usable via DataFactory.
+     * Immutable Customer id attribute set once when the object is created.
      */
-    protected Customer(Long id, String fullName, List<String> contacts) {
-        if (id == null) throw new IllegalArgumentException("ID must not be null");
-        if (fullName == null || fullName.isBlank()) throw new IllegalArgumentException("Name is empty");
+    private final long id;
 
-        String[] nameParts = splitName(fullName);
-        this.firstName = nameParts[0];
-        this.lastName = nameParts[1];
+    /**
+     * Customer's surname attribute set when the object is created. Can be
+     * updated by the {@link Validator} {@code updateName()} method.
+     */
+    private String lastName;
+
+    /**
+     * Customer's oone-surname name parts set when the object is created. Can
+     * be updated by the {@link Validator} {@code updateName()} method.
+     */
+    private String firstName;
+
+    /**
+     * Customer contact information with multiple entries of email addresses
+     * and/or phone numbers. Contacts can be update by {@link Validator}
+     * {@code addContact()} and {@code removeContact()} methods.
+     */
+    protected final List<String> contacts;
+
+    /**
+     * None-public accessor to update first- and lastName attributes by the
+     * {@link Validator} {@code updateName()} method.
+     */
+    protected final BiConsumer<String, String> nameUpdater =
+        (first, last) -> { firstName=first; lastName=last; };
+
+    /**
+     * Non-public constructor used by {@link DataFactory} that also provides
+     * the <i>id</i> attribute. {@link Customer} objects cannot be created
+     * outside this package.
+     */
+    protected Customer(long id, String lastName, String firstName, List<String> contacts) {
         this.id = id;
-        this.contacts = new ArrayList<>(contacts != null ? contacts : List.of());
+        this.lastName = lastName;
+        this.firstName = firstName;
+        this.contacts = contacts==null? new ArrayList<>() : contacts;
     }
 
-    public Long id() {
+    /**
+     * Public <i>id</i> getter.
+     * @return customer <i>id</i> attribute of {@link Customer} object
+     */
+    public long id() {
         return id;
     }
 
+    /**
+     * Public getter of the <i>lastName</i> attribute that always holds
+     * a valid last name (never null, not empty).
+     * @return value of lastName attribute, never null, not empty
+     */
     public String lastName() {
         return lastName;
     }
 
+    /**
+     * Public getter of the <i>firstName</i> attribute that always holds
+     * a valid first name (never null, may be empty if unknown).
+     * @return value of firstName attribute, never null, may be empty
+     */
     public String firstName() {
         return firstName;
     }
 
+    /**
+     * Return the number of contacts.
+     * @return number of contacts
+     */
     public int contactsCount() {
         return contacts.size();
     }
 
+    /**
+     * Public <i>contacts</i> getter as immutable {@code Iterable<String>}.
+     * @return contacts as immutable {@code Iterable<String>}
+     */
     public Iterable<String> contacts() {
-        return Collections.unmodifiableList(contacts);
-    }
-
-    @Override
-    public String toString() {
-        return String.format("%s, %s (%d contacts)", lastName, firstName, contacts.size());
-    }
-
-    // ------------------------------
-    // Hilfsmethoden übernommen aus Version A
-    // ------------------------------
-    private static String[] splitName(String name) {
-        name = trim(name);
-        name = name.replaceAll("\\s+", " ");  // korrekt escaped
-
-        String first = "", last = "";
-        if (name.contains(",") || name.contains(";")) {
-            String[] parts = name.split("[,;]", 2);
-            last = trim(parts[0]);
-            first = trim(parts[1]);
-        } else {
-            String[] parts = name.split(" ");
-            if (parts.length == 1) {
-                last = parts[0];
-            } else {
-                last = parts[parts.length - 1];
-                first = String.join(" ", java.util.Arrays.copyOfRange(parts, 0, parts.length - 1));
-            }
-        }
-
-        return new String[]{first, last};
-    }
-
-    private static String trim(String s) {
-        if (s == null) return "";
-        s = s.replaceAll("^[\\s\"',;]*", "");  // alles korrekt escaped
-        s = s.replaceAll("[\\s\"',;]*$", "");
-        return s;
+        return contacts;
     }
 }

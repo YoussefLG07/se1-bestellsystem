@@ -34,7 +34,10 @@ public class Application_D1 implements Runner {
             // 
             // attempts to create Customer objects from invalid email address, no object is created
             df.createCustomer("Mandy Mondschein", "locomandy<>gmx.de"),
-            df.createCustomer("", "nobody@gmx.de") // invalid name, no object is created
+            df.createCustomer("", "nobody@gmx.de"), // invalid name, no object is created
+            //corrected
+            df.createCustomer("Mandy Mondschein", "locomandy@gmx.de"),
+            df.createCustomer("Susanne Meisner", "nobody@gmx.de")
         // 
         ).stream()
             .flatMap(Optional::stream)

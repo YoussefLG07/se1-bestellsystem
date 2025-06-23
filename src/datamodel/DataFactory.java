@@ -4,37 +4,37 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
+
 /**
  * Class with <i>factory</i> methods to create objects of type {@code T}.
- *
+ * 
  * Factory centralizes object creation (e.g. {@code T:} {@link Customer}) from
  * validated parameters (e.g. valid <i>names</i> and <i>contacts</i>) at a
  * central location.
- *
+ * 
  * Objects are created only from valid parameters only provided with
  * {@code create} methods. Object {@code id} are assigned by the factory to
  * avoid duplication.
- *
+ * 
  * @version <code style=color:green>{@value application.package_info#Version}</code>
  * @author <code style=color:blue>{@value application.package_info#Author}</code>
  */
 public final class DataFactory {
 
-    // Singleton-Instanz
-    private static DataFactory instance;
-
-    // Zugriffsmethode für Singleton
-    public static DataFactory getInstance() {
-        if (instance == null) {
-            instance = new DataFactory();
-        }
-        return instance;
-    }
-
     /*
      * {@link Validator} instance used by {@link DataFactory}.
      */
     private final Validator validator = new Validator();
+ 
+    private static final DataFactory instance = new DataFactory();
+
+
+    public static DataFactory getInstance() {
+        if (instance == null) {
+            return new DataFactory();
+        }
+        return instance;
+    }
 
     /**
      * Inner class of a pool of unique <i>id</i> of type {@code ID}
@@ -51,7 +51,7 @@ public final class DataFactory {
          * @param expander call-out to expand <i>id</i> pool by given size
          */
         IdPool(List<ID> initial, BiConsumer<List<ID>, Integer> expander) {
-            this.ids = new ArrayList<>(initial == null ? List.of() : initial);
+            this.ids = new ArrayList<>(initial==null? List.of() : initial);
             this.idExpander = expander;
         }
 
@@ -60,7 +60,7 @@ public final class DataFactory {
          * @return next <i>id</i> from pool
          */
         ID next() {
-            if (current >= ids.size()) {
+            if(current >= ids.size()) {
                 idExpander.accept(ids, 25);
             }
             return ids.get(current++);
@@ -76,11 +76,10 @@ public final class DataFactory {
             892474L, 643270L, 286516L, 412396L, 456454L, 651286L
         ),
         (idPool, expandBy) -> // <i>id</i> pool expander:
-            Stream.generate(() -> (long) ((Math.random() * (999999 - 100000)) + 100000))
-                .filter(id -> !idPool.contains(id))
+            Stream.generate(() -> (long)((Math.random() * (999999 - 100000)) + 100000))
+                .filter(id -> ! idPool.contains(id))
                 .limit(expandBy)
-                .forEach(idPool::add)
-    );
+                .forEach(idPool::add));
 
     /*
      * Private constructor is part of the singleton pattern.
@@ -111,14 +110,14 @@ public final class DataFactory {
         final List<String> contacts = Arrays.stream(args)
             .map(arg -> {
                 var contact = validator.validateContact(arg);
-                if (contact.isEmpty()) {
+                if(contact.isEmpty()) {
                     flatName.append(arg).append(" ");
                 }
                 return contact;
             })
             .flatMap(Optional::stream)
             .toList();
-
+        // 
         return validator.validateName(flatName.toString())
             .map(np -> new Customer(customerIdPool.next(), np.lastName(), np.firstName(), contacts));
     }
