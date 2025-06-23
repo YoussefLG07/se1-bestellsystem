@@ -16,7 +16,7 @@ import datamodel.Customer;
  * @version <code style=color:green>{@value application.package_info#Version}</code>
  * @author <code style=color:blue>{@value application.package_info#Author}</code>
  */
-public class Application_C12 implements Runner {
+    public class Application_C12 implements Runner {
 
     /**
      * Run code of the <i>C12</i> assignment.
